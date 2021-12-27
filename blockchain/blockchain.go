@@ -10,7 +10,7 @@ func (chain *BlockChain) AddBlock(data string) {
 	chain.Blocks = append(chain.Blocks, newBlock)
 }
 
-func InitBLockChain() *BlockChain {
+func InitBlockChain() *BlockChain {
 	return &BlockChain{
 		[]*Block{
 			Genesis(),

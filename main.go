@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	chain := blockchain.InitBLockChain()
+	chain := blockchain.InitBlockChain()
 
 	chain.AddBlock("block1")
 	chain.AddBlock("block2")
