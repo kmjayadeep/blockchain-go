@@ -1,67 +1,20 @@
 package main
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"fmt"
+
+	"github.com/kmjayadeep/blockchain-go/blockchain"
 )
-
-type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-}
-
-func (b *Block) DeriveHash() {
-	info := bytes.Join(
-		[][]byte{b.Data, b.PrevHash},
-		[]byte{},
-	)
-	hash := sha256.Sum256(info)
-	b.Hash = hash[:]
-}
-
-func CreateBlock(data string, prevHash []byte) *Block {
-	block := &Block{
-		[]byte{},
-		[]byte(data),
-		prevHash,
-	}
-	block.DeriveHash()
-	return block
-}
-
-type BlockChain struct {
-	blocks []*Block
-}
-
-func (chain *BlockChain) AddBlock(data string) {
-	prevBlock := chain.blocks[len(chain.blocks)-1]
-	newBlock := CreateBlock(data, prevBlock.Hash)
-	chain.blocks = append(chain.blocks, newBlock)
-}
-
-func Genesis() *Block {
-	return CreateBlock("Genesis", []byte{})
-}
-
-func InitBLockChain() *BlockChain {
-	return &BlockChain{
-		[]*Block{
-			Genesis(),
-		},
-	}
-}
 
 func main() {
 
-	chain := InitBLockChain()
+	chain := blockchain.InitBLockChain()
 
 	chain.AddBlock("block1")
 	chain.AddBlock("block2")
 	chain.AddBlock("block2")
 
-	for _, block := range chain.blocks {
+	for _, block := range chain.Blocks {
 		fmt.Printf("Data %s\n", block.Data)
 		fmt.Printf("hash %x\n", block.Hash)
 		fmt.Printf("\n\n")
