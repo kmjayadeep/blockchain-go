@@ -30,24 +30,6 @@ func CreateBlock(data string, prevHash []byte) *Block {
 	return block
 }
 
-type BlockChain struct {
-	Blocks []*Block
-}
-
-func (chain *BlockChain) AddBlock(data string) {
-	prevBlock := chain.Blocks[len(chain.Blocks)-1]
-	newBlock := CreateBlock(data, prevBlock.Hash)
-	chain.Blocks = append(chain.Blocks, newBlock)
-}
-
 func Genesis() *Block {
 	return CreateBlock("Genesis", []byte{})
-}
-
-func InitBLockChain() *BlockChain {
-	return &BlockChain{
-		[]*Block{
-			Genesis(),
-		},
-	}
 }
