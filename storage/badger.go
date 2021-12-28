@@ -1,4 +1,4 @@
-package db
+package storage
 
 import (
 	"github.com/dgraph-io/badger/v3"
@@ -18,10 +18,10 @@ func NewDatabase(opts badger.Options) (*DB, error) {
 	}, nil
 }
 
-func (d *DB) Get(key []byte) ([]byte, error) {
+func (d *DB) Get(key string) ([]byte, error) {
 	var result []byte
 	err := d.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get(key)
+		item, err := txn.Get([]byte(key))
 		if err != nil {
 			return err
 		}
@@ -40,15 +40,15 @@ func (d *DB) Get(key []byte) ([]byte, error) {
 	return result, nil
 }
 
-func (d *DB) Put(key []byte, val []byte) error {
+func (d *DB) Put(key string, val []byte) error {
 	err := d.db.Update(func(txn *badger.Txn) error {
-		err := txn.Set(key, val)
+		err := txn.Set([]byte(key), val)
 		return err
 	})
 
 	return err
 }
 
-func (d *DB) Close() {
-	d.Close()
+func (d *DB) Close() error {
+	return d.db.Close()
 }

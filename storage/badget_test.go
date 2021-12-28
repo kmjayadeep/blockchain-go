@@ -1,22 +1,21 @@
-package db_test
+package storage_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/dgraph-io/badger/v3"
-	"github.com/kmjayadeep/blockchain-go/db"
+	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
 func TestDB(t *testing.T) {
-
-	db, err := db.NewDatabase(badger.DefaultOptions("").WithInMemory(true))
+	db, err := storage.NewDatabase(badger.DefaultOptions("").WithInMemory(true))
 	if err != nil {
 		t.Errorf("unable to initialize db")
 	}
 	defer db.Close()
 
-	testKey := []byte("testkey")
+	testKey := "testkey"
 	testVal := []byte("testval")
 
 	err = db.Put(testKey, testVal)
