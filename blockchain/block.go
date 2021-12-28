@@ -3,6 +3,7 @@ package blockchain
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 )
 
 type Block struct {
@@ -37,6 +38,10 @@ func (b *Block) Serialize() ([]byte, error) {
 	}
 
 	return res.Bytes(), nil
+}
+
+func (b *Block) HashString() string {
+	return fmt.Sprintf("%x", b.Hash)
 }
 
 func Deserialize(data []byte) (*Block, error) {

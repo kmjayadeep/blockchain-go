@@ -5,18 +5,21 @@ import (
 
 	"github.com/dgraph-io/badger/v3"
 	"github.com/kmjayadeep/blockchain-go/blockchain"
-	"github.com/kmjayadeep/blockchain-go/db"
+	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
 func main() {
 
-	db, err := db.NewDatabase(badger.DefaultOptions("/tmp/blockchain"))
+	db, err := storage.NewDatabase(badger.DefaultOptions("/tmp/blockchain"))
 
 	if err != nil {
 		log.Fatal(err, "unable to create db")
 	}
 
-	chain := blockchain.InitBlockChain(db)
+	chain, err := blockchain.InitBlockChain(db)
+	if err != nil {
+		log.Fatal(err, "unable to create db")
+	}
 
 	chain.AddBlock("block1")
 	chain.AddBlock("block2")
