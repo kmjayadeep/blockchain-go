@@ -26,37 +26,6 @@ func TestBlock(t *testing.T) {
 	}
 }
 
-func TestDeriveHash(t *testing.T) {
-	data := "testData"
-	prevHash := []byte("test")
-	block := &Block{
-		Data:     []byte(data),
-		PrevHash: prevHash,
-	}
-	block.DeriveHash()
-	hash := block.Hash
-	if hash == nil || len(hash) == 0 {
-		t.Errorf("hash not computed")
-	}
-
-	// Change data and test again
-	data = "testData1"
-	block.Data = []byte(data)
-	block.DeriveHash()
-	if bytes.Compare(hash, block.Hash) == 0 {
-		t.Errorf("hash not computed based on data")
-	}
-
-	// Change prevHash and test again
-	hash = block.Hash
-	prevHash = []byte("test1")
-	block.PrevHash = prevHash
-	block.DeriveHash()
-	if bytes.Compare(hash, block.Hash) == 0 {
-		t.Errorf("hash not computed based on prevHash")
-	}
-}
-
 func TestGenesis(t *testing.T) {
 	block := Genesis()
 	if string(block.Data) != "Genesis" {

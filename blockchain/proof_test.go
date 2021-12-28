@@ -16,3 +16,14 @@ func TestNewProof(t *testing.T) {
 	}
 
 }
+
+func TestInitData(t *testing.T) {
+	pow := NewProof(CreateBlock("test", []byte("testPrev")))
+
+	data := pow.InitData(0)
+
+	if len(data) != 28 {
+		t.Errorf("data doesn't contain all the fields, len : %d", len(data))
+	}
+
+}
