@@ -45,7 +45,7 @@ func (b *Block) HashString() string {
 }
 
 func (b *Block) String() string {
-	return fmt.Sprintf("Block - Hash :%x, PrevHash:%x, Data:%s, Nonce:%d",
+	return fmt.Sprintf("Block - Hash:%x, PrevHash:%x, Data:%s, Nonce:%d",
 		b.Hash,
 		b.PrevHash,
 		b.Data,
