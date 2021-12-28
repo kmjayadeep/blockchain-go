@@ -26,6 +26,15 @@ func TestProof(t *testing.T) {
 		t.Errorf("got invalid hash")
 	}
 
+	if !pow.Validate() {
+		t.Errorf("pow should be valid")
+	}
+
+	pow.Block.Data = []byte("modified data")
+	if pow.Validate() {
+		t.Errorf("pow should be invalid")
+	}
+
 }
 
 func BenchmarkProofRun(b *testing.B) {
