@@ -1,19 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"strconv"
+	"os"
 
 	"github.com/dgraph-io/badger/v3"
-	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/blockchain"
+	"github.com/kmjayadeep/blockchain-go/cli"
 	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
 func main() {
+	// close app once this function is finished
+	defer os.Exit(0)
 
-	db, err := storage.NewDatabase(badger.DefaultOptions("/tmp/blockchain"))
+	opts := badger.DefaultOptions("/tmp/blockchain")
+	opts.Logger = nil
+	db, err := storage.NewDatabase(opts)
+	defer db.Close()
 
 	if err != nil {
 		log.Fatal(err, "unable to create db")
@@ -21,22 +25,9 @@ func main() {
 
 	chain, err := blockchain.InitBlockChain(db)
 	if err != nil {
-		log.Fatal(err, "unable to create db")
+		log.Fatal(err, "unable to initialize blockchain")
 	}
 
-	iter := chain.Iterator()
-
-	b := iter.Next()
-
-	for b != nil {
-		fmt.Println(b.String())
-
-		pow := block.NewProof(b)
-		fmt.Printf("pow validated %s\n", strconv.FormatBool(pow.Validate()))
-
-		fmt.Printf("\n\n")
-
-		b = iter.Next()
-	}
-
+	commandLine := cli.NewCommandLine(chain)
+	commandLine.Run(os.Args)
 }

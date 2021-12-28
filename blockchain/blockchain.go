@@ -24,7 +24,7 @@ func InitBlockChain(db storage.Database) (*BlockChain, error) {
 
 	if err == storage.ErrKeyNotFound {
 		// key doesn't exist in db
-		log.Println("creating new geneis")
+		log.Println("creating new genesis")
 		genesis := block.Genesis()
 
 		serialized, err := genesis.Serialize()
