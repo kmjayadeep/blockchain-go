@@ -36,3 +36,30 @@ func TestGenesis(t *testing.T) {
 		t.Errorf("hash not computed for genesis")
 	}
 }
+
+func TestSerialize(t *testing.T) {
+	data := "testData"
+	prevHash := []byte("testHash")
+	block := CreateBlock(data, prevHash)
+
+	serialized, err := block.Serialize()
+
+	if err != nil {
+		t.Errorf("block not serialized, %s", err.Error())
+	}
+
+	newBlock, err := Deserialize(serialized)
+
+	if newBlock == nil || err != nil {
+		t.Errorf("block not deserialized, %s", err.Error())
+	}
+
+	if string(newBlock.Data) != data {
+		t.Errorf("data not deserialized")
+	}
+
+	if bytes.Compare(newBlock.PrevHash, prevHash) != 0 {
+		t.Errorf("prevHash not deserialized")
+	}
+
+}
