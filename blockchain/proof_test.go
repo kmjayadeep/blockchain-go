@@ -1,10 +1,11 @@
 package blockchain
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestNewProof(t *testing.T) {
+func TestProof(t *testing.T) {
 	pow := NewProof(CreateBlock("test", []byte("test")))
 
 	if pow.Target == nil {
@@ -15,15 +16,21 @@ func TestNewProof(t *testing.T) {
 		t.Errorf("target is invalid: got : %s", pow.Target)
 	}
 
-}
+	nonce, hash := pow.Run()
 
-func TestInitData(t *testing.T) {
-	pow := NewProof(CreateBlock("test", []byte("testPrev")))
-
-	data := pow.InitData(0)
-
-	if len(data) != 28 {
-		t.Errorf("data doesn't contain all the fields, len : %d", len(data))
+	if nonce != 13761 {
+		t.Errorf("got invalid nonce")
 	}
 
+	if fmt.Sprintf("%x", hash) != "0005a106619410ca1c365c6bf02bb1a25bbcb96cd55a2dd24348b36af5d3ecd0" {
+		t.Errorf("got invalid hash")
+	}
+
+}
+
+func BenchmarkProofRun(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		pow := NewProof(CreateBlock(fmt.Sprintf("test block %d", i), []byte("prev hash")))
+		pow.Run()
+	}
 }
