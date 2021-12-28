@@ -50,8 +50,20 @@ func InitBlockChain(db storage.Database) (*BlockChain, error) {
 	return &chain, nil
 }
 
-func (chain *BlockChain) AddBlock(data string) {
-	// prevBlock := chain.Blocks[len(chain.Blocks)-1]
-	// newBlock := CreateBlock(data, prevBlock.Hash)
-	// chain.Blocks = append(chain.Blocks, newBlock)
+func (chain *BlockChain) AddBlock(data string) error {
+	newBlock := CreateBlock(data, chain.LastHash)
+	serialized, err := newBlock.Serialize()
+	if err != nil {
+		return err
+	}
+	err = chain.DB.Put(newBlock.HashString(), serialized)
+	if err != nil {
+		return err
+	}
+	err = chain.DB.Put("lh", newBlock.Hash)
+	if err != nil {
+		return err
+	}
+	chain.LastHash = newBlock.Hash
+	return nil
 }

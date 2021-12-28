@@ -41,5 +41,8 @@ func TestAddBlock(t *testing.T) {
 		t.Errorf("unable to initialize chain with error %s", err.Error())
 	}
 
-	chain.AddBlock("testing")
+	err = chain.AddBlock("testing")
+	if err != nil {
+		t.Errorf("unable to add block with error %s", err.Error())
+	}
 }
