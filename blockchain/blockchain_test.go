@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/dgraph-io/badger/v3"
+	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
@@ -29,13 +30,13 @@ func TestInitBlockChain(t *testing.T) {
 		t.Errorf("blockchain doesn't have genesis, got hash %x", chain.LastHash)
 	}
 
-	var blocks []*Block
+	var blocks []*block.Block
 	iter := chain.Iterator()
-	block := iter.Next()
+	b := iter.Next()
 
-	for block != nil {
-		blocks = append(blocks, block)
-		block = iter.Next()
+	for b != nil {
+		blocks = append(blocks, b)
+		b = iter.Next()
 	}
 
 	if len(blocks) != 1 {
@@ -64,20 +65,20 @@ func TestAddBlock(t *testing.T) {
 		t.Errorf("unable to add block with error %s", err.Error())
 	}
 
-	var blocks []*Block
+	var blocks []*block.Block
 	iter := chain.Iterator()
-	block := iter.Next()
+	b := iter.Next()
 
-	for block != nil {
-		blocks = append(blocks, block)
-		block = iter.Next()
+	for b != nil {
+		blocks = append(blocks, b)
+		b = iter.Next()
 	}
 
 	if len(blocks) != 2 {
 		t.Errorf("blockchain count doesnt match. got size %d", len(blocks))
 	}
 
-	genesis := Genesis()
+	genesis := block.Genesis()
 	if genesis.String() != blocks[1].String() {
 		t.Errorf("blockchain doesn't have genesis - %s,\n got %s", genesis, blocks[1])
 	}

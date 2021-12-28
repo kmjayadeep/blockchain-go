@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
@@ -24,7 +25,7 @@ func InitBlockChain(db storage.Database) (*BlockChain, error) {
 	if err == storage.ErrKeyNotFound {
 		// key doesn't exist in db
 		log.Println("creating new geneis")
-		genesis := Genesis()
+		genesis := block.Genesis()
 
 		serialized, err := genesis.Serialize()
 		if err != nil {
@@ -52,7 +53,7 @@ func InitBlockChain(db storage.Database) (*BlockChain, error) {
 }
 
 func (chain *BlockChain) AddBlock(data string) error {
-	newBlock := CreateBlock(data, chain.LastHash)
+	newBlock := block.CreateBlock(data, chain.LastHash)
 	serialized, err := newBlock.Serialize()
 	if err != nil {
 		return err
@@ -69,8 +70,8 @@ func (chain *BlockChain) AddBlock(data string) error {
 	return nil
 }
 
-func (chain *BlockChain) Iterator() *BlockIterator {
-	iter := &BlockIterator{
+func (chain *BlockChain) Iterator() *Iterator {
+	iter := &Iterator{
 		chain.DB,
 		fmt.Sprintf("%x", chain.LastHash),
 	}

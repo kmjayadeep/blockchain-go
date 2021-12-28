@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/dgraph-io/badger/v3"
+	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/blockchain"
 	"github.com/kmjayadeep/blockchain-go/storage"
 )
@@ -25,15 +28,23 @@ func main() {
 	chain.AddBlock("block2")
 	chain.AddBlock("block2")
 
-	// for _, block := range chain.Blocks {
-	// fmt.Printf("Data %s\n", block.Data)
-	// fmt.Printf("hash %x\n", block.Hash)
-	// fmt.Printf("nonce %d\n", block.Nonce)
+	iter := chain.Iterator()
 
-	// pow := blockchain.NewProof(block)
-	// fmt.Printf("pow validated %s\n", strconv.FormatBool(pow.Validate()))
+	b := iter.Next()
 
-	// fmt.Printf("\n\n")
-	// }
+	for b != nil {
+		// fmt.Printf("Data %s\n", b.Data)
+		// fmt.Printf("hash %x\n", b.Hash)
+		// fmt.Printf("nonce %d\n", b.Nonce)
+
+		fmt.Println(b.String())
+
+		pow := block.NewProof(b)
+		fmt.Printf("pow validated %s\n", strconv.FormatBool(pow.Validate()))
+
+		fmt.Printf("\n\n")
+
+		b = iter.Next()
+	}
 
 }
