@@ -28,6 +28,24 @@ func TestInitBlockChain(t *testing.T) {
 	if fmt.Sprintf("%x", chain.LastHash) != genesisHash {
 		t.Errorf("blockchain doesn't have genesis, got hash %x", chain.LastHash)
 	}
+
+	var blocks []*Block
+	iter := chain.Iterator()
+	block := iter.Next()
+
+	for block != nil {
+		blocks = append(blocks, block)
+		block = iter.Next()
+	}
+
+	if len(blocks) != 1 {
+		t.Errorf("blockchain doesn't have genesis, got size %d", len(blocks))
+	}
+
+	if string(blocks[0].Data) != "Genesis" {
+		t.Errorf("blockchain doesn't have genesis")
+	}
+
 }
 
 func TestAddBlock(t *testing.T) {
@@ -44,5 +62,27 @@ func TestAddBlock(t *testing.T) {
 	err = chain.AddBlock("testing")
 	if err != nil {
 		t.Errorf("unable to add block with error %s", err.Error())
+	}
+
+	var blocks []*Block
+	iter := chain.Iterator()
+	block := iter.Next()
+
+	for block != nil {
+		blocks = append(blocks, block)
+		block = iter.Next()
+	}
+
+	if len(blocks) != 2 {
+		t.Errorf("blockchain count doesnt match. got size %d", len(blocks))
+	}
+
+	genesis := Genesis()
+	if genesis.String() != blocks[1].String() {
+		t.Errorf("blockchain doesn't have genesis - %s,\n got %s", genesis, blocks[1])
+	}
+
+	if string(blocks[0].Data) != "testing" {
+		t.Errorf("blockchain doesn't have new block, got data %s", blocks[1].Data)
 	}
 }

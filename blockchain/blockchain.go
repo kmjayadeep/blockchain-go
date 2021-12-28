@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/kmjayadeep/blockchain-go/storage"
@@ -66,4 +67,12 @@ func (chain *BlockChain) AddBlock(data string) error {
 	}
 	chain.LastHash = newBlock.Hash
 	return nil
+}
+
+func (chain *BlockChain) Iterator() *BlockIterator {
+	iter := &BlockIterator{
+		chain.DB,
+		fmt.Sprintf("%x", chain.LastHash),
+	}
+	return iter
 }

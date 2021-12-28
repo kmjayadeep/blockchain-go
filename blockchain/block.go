@@ -44,6 +44,15 @@ func (b *Block) HashString() string {
 	return fmt.Sprintf("%x", b.Hash)
 }
 
+func (b *Block) String() string {
+	return fmt.Sprintf("Block - Hash :%x, PrevHash:%x, Data:%s, Nonce:%d",
+		b.Hash,
+		b.PrevHash,
+		b.Data,
+		b.Nonce,
+	)
+}
+
 func Deserialize(data []byte) (*Block, error) {
 	var block Block
 
