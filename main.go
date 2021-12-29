@@ -27,11 +27,6 @@ func main() {
 		log.Fatal(err, "unable to create db")
 	}
 
-	// chain, err := blockchain.ContinueBlockChain(db, address)
-	// if err != nil {
-	// log.Fatal(err, "unable to initialize blockchain")
-	// }
-
 	commandLine := cli.NewCommandLine(db)
 	commandLine.Run(os.Args)
 }
