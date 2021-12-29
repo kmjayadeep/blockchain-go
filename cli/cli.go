@@ -9,22 +9,25 @@ import (
 
 	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/blockchain"
+	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
 type CommandLine struct {
-	blockchain *blockchain.BlockChain
+	db *storage.DB
 }
 
-func NewCommandLine(chain *blockchain.BlockChain) *CommandLine {
+func NewCommandLine(db *storage.DB) *CommandLine {
 	return &CommandLine{
-		chain,
+		db,
 	}
 }
 
 func (c *CommandLine) printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println(" add -block BLOCK_DATA - add a block to the chain")
+	fmt.Println(" getbalance -address ADDRESS - get balance for the address")
+	fmt.Println(" createblockchain -address creates a blockchain with genesis block created for the address")
 	fmt.Println(" print - Prints the blocks in the chain")
+	fmt.Println(" send -from FROM -to TO -amount AMOUNt - send token")
 }
 
 func (c *CommandLine) validateArgs(args []string) {
@@ -34,13 +37,21 @@ func (c *CommandLine) validateArgs(args []string) {
 	}
 }
 
-func (c *CommandLine) addBlock(data string) {
-	// c.blockchain.AddBlock(data)
-	log.Println("Added block")
+func (c *CommandLine) createBlockchain(address string) {
+	_, err := blockchain.InitBlockChain(c.db, address)
+	if err != nil {
+		fmt.Printf("Unable to create blockchain due to error : %s", err.Error())
+		return
+	}
+	fmt.Printf("Blockchain created")
 }
 
 func (c *CommandLine) printChain() {
-	iter := c.blockchain.Iterator()
+	chain, err := blockchain.ContinueBlockChain(c.db)
+	if err != nil {
+		log.Fatal(err, "unable to continue blockchain")
+	}
+	iter := chain.Iterator()
 
 	b := iter.Next()
 
@@ -59,17 +70,16 @@ func (c *CommandLine) printChain() {
 func (c *CommandLine) Run(args []string) {
 	c.validateArgs(args)
 
-	addBlockCmd := flag.NewFlagSet("add", flag.ExitOnError)
-	printCnainCmd := flag.NewFlagSet("print", flag.ExitOnError)
-	addBlockData := addBlockCmd.String("block", "", "Block data")
+	createBlockchainCmd := flag.NewFlagSet("createBlockchain", flag.ExitOnError)
+	printChainCmd := flag.NewFlagSet("print", flag.ExitOnError)
 
 	switch args[1] {
-	case "add":
-		err := addBlockCmd.Parse(args[2:])
+	case "createblockchain":
+		err := createBlockchainCmd.Parse(args[2:])
 		handleErr(err)
 
 	case "print":
-		err := printCnainCmd.Parse(args[2:])
+		err := printChainCmd.Parse(args[2:])
 		handleErr(err)
 
 	default:
@@ -77,16 +87,12 @@ func (c *CommandLine) Run(args []string) {
 		runtime.Goexit()
 	}
 
-	if addBlockCmd.Parsed() {
-		if *addBlockData == "" {
-			addBlockCmd.Usage()
-			runtime.Goexit()
-		}
-		c.addBlock(*addBlockData)
+	if printChainCmd.Parsed() {
+		c.printChain()
 	}
 
-	if printCnainCmd.Parsed() {
-		c.printChain()
+	if createBlockchainCmd.Parsed() {
+		c.createBlockchain("koo")
 	}
 
 }

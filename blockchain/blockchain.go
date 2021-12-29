@@ -21,7 +21,7 @@ var (
 	ErrAlreadyInitialized = fmt.Errorf("Blockchain already initialized")
 )
 
-func ContinueBlockChain(db storage.Database, address string) (*BlockChain, error) {
+func ContinueBlockChain(db storage.Database) (*BlockChain, error) {
 
 	hash, err := db.Get("lh")
 

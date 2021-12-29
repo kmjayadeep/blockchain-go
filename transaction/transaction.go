@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
 	"fmt"
 )
 
@@ -44,6 +45,36 @@ func (tx *Transaction) IsCoinbase() bool {
 	return len(tx.Inputs) == 1 &&
 		len(tx.Inputs[0].ID) == 0 &&
 		tx.Inputs[0].Out == -1
+}
+
+func NewTransaction(from, to string, amount, accumulated int, validOutputs map[string][]int) (*Transaction, error) {
+	var inputs []TxInput
+	var outputs []TxOutput
+
+	if accumulated < amount {
+		return nil, fmt.Errorf("not enough funds")
+	}
+
+	for txid, outs := range validOutputs {
+		txId, err := hex.DecodeString(txid)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, out := range outs {
+			input := TxInput{txId, out, from}
+			inputs = append(inputs, input)
+		}
+	}
+
+	outputs = append(outputs, TxOutput{amount, to})
+	if accumulated > amount {
+		outputs = append(outputs, TxOutput{accumulated - amount, from})
+	}
+
+	tx := &Transaction{nil, inputs, outputs}
+	tx.SetID()
+	return tx, nil
 }
 
 func CoinbaseTx(to, data string) (*Transaction, error) {

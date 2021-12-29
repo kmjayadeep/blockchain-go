@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/dgraph-io/badger/v3"
-	"github.com/kmjayadeep/blockchain-go/blockchain"
 	"github.com/kmjayadeep/blockchain-go/cli"
 	"github.com/kmjayadeep/blockchain-go/storage"
 )
@@ -28,11 +27,11 @@ func main() {
 		log.Fatal(err, "unable to create db")
 	}
 
-	chain, err := blockchain.ContinueBlockChain(db, address)
-	if err != nil {
-		log.Fatal(err, "unable to initialize blockchain")
-	}
+	// chain, err := blockchain.ContinueBlockChain(db, address)
+	// if err != nil {
+	// log.Fatal(err, "unable to initialize blockchain")
+	// }
 
-	commandLine := cli.NewCommandLine(chain)
+	commandLine := cli.NewCommandLine(db)
 	commandLine.Run(os.Args)
 }
