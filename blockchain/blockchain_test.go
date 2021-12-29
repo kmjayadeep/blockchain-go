@@ -106,3 +106,59 @@ func TestAddBlock(t *testing.T) {
 		t.Errorf("blockchain doesn't have new block, got data %s", blocks[0].String())
 	}
 }
+
+func TestContinueBlockChain(t *testing.T) {
+	db, err := storage.NewDatabase(badger.DefaultOptions("").WithInMemory(true))
+	if err != nil {
+		t.Errorf("unable to initialize db")
+	}
+	defer db.Close()
+
+	address := "address"
+	chain, err := blockchain.InitBlockChain(db, address)
+
+	if chain == nil {
+		t.Errorf("unable to initialize chain")
+	}
+
+	if err != nil {
+		t.Errorf("unable to initialize chain with error %s", err.Error())
+	}
+
+	// reuse the same db to continue blockchain
+	chain, err = blockchain.ContinueBlockChain(db)
+
+	var blocks []*block.Block
+	iter := chain.Iterator()
+	b := iter.Next()
+
+	for b != nil {
+		blocks = append(blocks, b)
+		b = iter.Next()
+	}
+
+	if len(blocks) != 1 {
+		t.Errorf("blockchain count doesnt match. got size %d", len(blocks))
+	}
+
+	tx, _ := transaction.CoinbaseTx(address, GenesisData)
+	genesis := block.Genesis(tx)
+	if genesis.String() != blocks[0].String() {
+		t.Errorf("blockchain doesn't have genesis - %s,\n got %s", genesis, blocks[1])
+	}
+
+}
+
+func TestContinueBlockChainError(t *testing.T) {
+	db, err := storage.NewDatabase(badger.DefaultOptions("").WithInMemory(true))
+	if err != nil {
+		t.Errorf("unable to initialize db")
+	}
+	defer db.Close()
+
+	_, err = blockchain.ContinueBlockChain(db)
+
+	if err != blockchain.ErrNotInitialized {
+		t.Errorf("Expected error :%s", blockchain.ErrAlreadyInitialized.Error())
+	}
+}

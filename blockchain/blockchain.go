@@ -21,6 +21,7 @@ var (
 	ErrAlreadyInitialized = fmt.Errorf("Blockchain already initialized")
 )
 
+// Continue an existing blockchain from db
 func ContinueBlockChain(db storage.Database) (*BlockChain, error) {
 
 	hash, err := db.Get("lh")
@@ -41,6 +42,7 @@ func ContinueBlockChain(db storage.Database) (*BlockChain, error) {
 	return &chain, nil
 }
 
+// Initialize a new blockchain by adding a genesis block
 func InitBlockChain(db storage.Database, address string) (*BlockChain, error) {
 	hash, err := db.Get("lh")
 
@@ -84,6 +86,7 @@ func InitBlockChain(db storage.Database, address string) (*BlockChain, error) {
 	return &chain, nil
 }
 
+// Find transactions which have unspent tokens for a given address
 func (chain *BlockChain) FindUnspentTransactions(address string) []transaction.Transaction {
 	var unspentTxs []transaction.Transaction
 
@@ -130,6 +133,7 @@ func (chain *BlockChain) FindUnspentTransactions(address string) []transaction.T
 	return unspentTxs
 }
 
+// Find unspent transaction outpits for a given address
 func (chain *BlockChain) FindUTXO(address string) []transaction.TxOutput {
 	var UTXOs []transaction.TxOutput
 
@@ -146,6 +150,7 @@ func (chain *BlockChain) FindUTXO(address string) []transaction.TxOutput {
 	return UTXOs
 }
 
+// Find spendable outputs for a given address
 func (chain *BlockChain) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
 	unspentOuts := make(map[string][]int)
 	unspentTxs := chain.FindUnspentTransactions(address)
@@ -169,6 +174,7 @@ func (chain *BlockChain) FindSpendableOutputs(address string, amount int) (int, 
 	return accumulated, unspentOuts
 }
 
+// Add a new block to blockchain with given set of transactions
 func (chain *BlockChain) AddBlock(transactions []*transaction.Transaction) error {
 	newBlock := block.CreateBlock(transactions, chain.LastHash)
 	serialized, err := newBlock.Serialize()
