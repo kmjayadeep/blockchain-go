@@ -1,15 +1,23 @@
-package block
+package block_test
 
 import (
-	"fmt"
+	"encoding/hex"
 	"testing"
 
+	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/transaction"
 )
 
+func createTestBlock(txId, prevHash string) *block.Block {
+	data := []*transaction.Transaction{{
+		ID: []byte(txId),
+	}}
+	block := block.CreateBlock(data, []byte(prevHash))
+	return block
+}
+
 func TestProof(t *testing.T) {
-	data := []*transaction.Transaction{}
-	pow := NewProof(CreateBlock(data, []byte("test")))
+	pow := block.NewProof(createTestBlock("testTxId", "testPrevHash"))
 
 	if pow.Target == nil {
 		t.Errorf("target not defined")
@@ -21,12 +29,13 @@ func TestProof(t *testing.T) {
 
 	nonce, hash := pow.Run()
 
-	if nonce != 13761 {
-		t.Errorf("got invalid nonce")
+	if nonce != 466 {
+		t.Errorf("got invalid nonce, got %d", nonce)
 	}
 
-	if fmt.Sprintf("%x", hash) != "0005a106619410ca1c365c6bf02bb1a25bbcb96cd55a2dd24348b36af5d3ecd0" {
-		t.Errorf("got invalid hash")
+	hashString := hex.EncodeToString(hash)
+	if hashString != "0009236aa05ed56b5d2c4c86fb14f1313f3c1cfe4fbd0772993fbdace29868b9" {
+		t.Errorf("got invalid hash. got %s", hashString)
 	}
 
 	if !pow.Validate() {
@@ -43,8 +52,7 @@ func TestProof(t *testing.T) {
 
 func BenchmarkProofRun(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		data := []*transaction.Transaction{}
-		pow := NewProof(CreateBlock(data, []byte("prev hash")))
+		pow := block.NewProof(createTestBlock("testId", "testHash"))
 		pow.Run()
 	}
 }

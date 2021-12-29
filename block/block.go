@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/kmjayadeep/blockchain-go/transaction"
@@ -44,7 +45,7 @@ func (b *Block) Serialize() ([]byte, error) {
 }
 
 func (b *Block) HashString() string {
-	return fmt.Sprintf("%x", b.Hash)
+	return hex.EncodeToString(b.Hash)
 }
 
 func (b *Block) hashTransactions() []byte {
