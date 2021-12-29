@@ -7,6 +7,7 @@ import (
 	"github.com/dgraph-io/badger/v3"
 	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/storage"
+	"github.com/kmjayadeep/blockchain-go/transaction"
 )
 
 func TestInitBlockChain(t *testing.T) {
@@ -15,7 +16,7 @@ func TestInitBlockChain(t *testing.T) {
 		t.Errorf("unable to initialize db")
 	}
 	defer db.Close()
-	chain, err := InitBlockChain(db)
+	chain, err := InitBlockChain(db, "myaddress")
 
 	if chain == nil {
 		t.Errorf("unable to initialize chain")
@@ -43,8 +44,8 @@ func TestInitBlockChain(t *testing.T) {
 		t.Errorf("blockchain doesn't have genesis, got size %d", len(blocks))
 	}
 
-	if string(blocks[0].Data) != "Genesis" {
-		t.Errorf("blockchain doesn't have genesis")
+	if !blocks[0].Transactions[0].IsCoinbase() {
+		t.Errorf("blockchain doesn't have genesis coinbase")
 	}
 
 }
@@ -55,7 +56,7 @@ func TestAddBlock(t *testing.T) {
 		t.Errorf("unable to initialize db")
 	}
 	defer db.Close()
-	chain, err := InitBlockChain(db)
+	chain, err := InitBlockChain(db, "address")
 	if err != nil {
 		t.Errorf("unable to initialize chain with error %s", err.Error())
 	}
@@ -78,12 +79,13 @@ func TestAddBlock(t *testing.T) {
 		t.Errorf("blockchain count doesnt match. got size %d", len(blocks))
 	}
 
-	genesis := block.Genesis()
+	tx, _ := transaction.CoinbaseTx("address", "genesis")
+	genesis := block.Genesis(tx)
 	if genesis.String() != blocks[1].String() {
 		t.Errorf("blockchain doesn't have genesis - %s,\n got %s", genesis, blocks[1])
 	}
 
-	if string(blocks[0].Data) != "testing" {
-		t.Errorf("blockchain doesn't have new block, got data %s", blocks[1].Data)
+	if blocks[0].Transactions[0].Inputs[0].Sig != "testing" {
+		t.Errorf("blockchain doesn't have new block, got data %s", blocks[0].Transactions[0].Inputs[0].Sig)
 	}
 }

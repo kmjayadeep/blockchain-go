@@ -2,21 +2,24 @@ package block
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
+
+	"github.com/kmjayadeep/blockchain-go/transaction"
 )
 
 type Block struct {
-	Hash     []byte
-	Data     []byte
-	PrevHash []byte
-	Nonce    int
+	Hash         []byte
+	Transactions []*transaction.Transaction
+	PrevHash     []byte
+	Nonce        int
 }
 
-func CreateBlock(data string, prevHash []byte) *Block {
+func CreateBlock(transactions []*transaction.Transaction, prevHash []byte) *Block {
 	block := &Block{
 		[]byte{},
-		[]byte(data),
+		transactions,
 		prevHash,
 		0,
 	}
@@ -44,11 +47,24 @@ func (b *Block) HashString() string {
 	return fmt.Sprintf("%x", b.Hash)
 }
 
+func (b *Block) hashTransactions() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID)
+	}
+
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{}))
+
+	return txHash[:]
+}
+
 func (b *Block) String() string {
-	return fmt.Sprintf("Block - Hash:%x, PrevHash:%x, Data:%s, Nonce:%d",
+	return fmt.Sprintf("Block - Hash:%x, PrevHash:%x, Transactions:%d, Nonce:%d",
 		b.Hash,
 		b.PrevHash,
-		b.Data,
+		len(b.Transactions),
 		b.Nonce,
 	)
 }
@@ -65,6 +81,8 @@ func Deserialize(data []byte) (*Block, error) {
 	return &block, nil
 }
 
-func Genesis() *Block {
-	return CreateBlock("Genesis", []byte{})
+func Genesis(coinbase *transaction.Transaction) *Block {
+	return CreateBlock(
+		[]*transaction.Transaction{coinbase},
+		[]byte{})
 }

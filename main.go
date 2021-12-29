@@ -10,11 +10,16 @@ import (
 	"github.com/kmjayadeep/blockchain-go/storage"
 )
 
+const (
+	dbPath  = ".data/blocks"
+	address = "myaddress"
+)
+
 func main() {
 	// close app once this function is finished
 	defer os.Exit(0)
 
-	opts := badger.DefaultOptions("/tmp/blockchain")
+	opts := badger.DefaultOptions(dbPath)
 	opts.Logger = nil
 	db, err := storage.NewDatabase(opts)
 	defer db.Close()
@@ -23,7 +28,7 @@ func main() {
 		log.Fatal(err, "unable to create db")
 	}
 
-	chain, err := blockchain.InitBlockChain(db)
+	chain, err := blockchain.ContinueBlockChain(db, address)
 	if err != nil {
 		log.Fatal(err, "unable to initialize blockchain")
 	}

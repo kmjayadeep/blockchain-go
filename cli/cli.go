@@ -35,7 +35,7 @@ func (c *CommandLine) validateArgs(args []string) {
 }
 
 func (c *CommandLine) addBlock(data string) {
-	c.blockchain.AddBlock(data)
+	// c.blockchain.AddBlock(data)
 	log.Println("Added block")
 }
 

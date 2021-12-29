@@ -2,11 +2,14 @@ package block
 
 import (
 	"bytes"
+	"reflect"
 	"testing"
+
+	"github.com/kmjayadeep/blockchain-go/transaction"
 )
 
 func TestBlock(t *testing.T) {
-	data := "testData"
+	data := []*transaction.Transaction{}
 	prevHash := []byte("test")
 	block := CreateBlock(data, prevHash)
 
@@ -14,7 +17,7 @@ func TestBlock(t *testing.T) {
 		t.Fatalf("block is not created by createblock")
 	}
 
-	if bytes.Compare([]byte(data), block.Data) != 0 {
+	if reflect.DeepEqual(data, block.Transactions) {
 		t.Errorf("data not stored in the block")
 	}
 	if bytes.Compare(prevHash, block.PrevHash) != 0 {
@@ -27,9 +30,10 @@ func TestBlock(t *testing.T) {
 }
 
 func TestGenesis(t *testing.T) {
-	block := Genesis()
-	if string(block.Data) != "Genesis" {
-		t.Errorf("wrong data in genesis %s", block.Data)
+	coinbase, _ := transaction.CoinbaseTx("to", "Genesis")
+	block := Genesis(coinbase)
+	if string(block.Transactions[0].Inputs[0].Sig) != "Genesis" {
+		t.Errorf("wrong data in genesis")
 	}
 	hash := block.Hash
 	if hash == nil || len(hash) == 0 {
@@ -38,7 +42,7 @@ func TestGenesis(t *testing.T) {
 }
 
 func TestSerialize(t *testing.T) {
-	data := "testData"
+	data := []*transaction.Transaction{}
 	prevHash := []byte("testHash")
 	block := CreateBlock(data, prevHash)
 
@@ -54,7 +58,7 @@ func TestSerialize(t *testing.T) {
 		t.Errorf("block not deserialized, %s", err.Error())
 	}
 
-	if string(newBlock.Data) != data {
+	if reflect.DeepEqual(data, newBlock.Transactions) {
 		t.Errorf("data not deserialized")
 	}
 

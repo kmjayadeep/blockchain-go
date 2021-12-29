@@ -3,10 +3,13 @@ package block
 import (
 	"fmt"
 	"testing"
+
+	"github.com/kmjayadeep/blockchain-go/transaction"
 )
 
 func TestProof(t *testing.T) {
-	pow := NewProof(CreateBlock("test", []byte("test")))
+	data := []*transaction.Transaction{}
+	pow := NewProof(CreateBlock(data, []byte("test")))
 
 	if pow.Target == nil {
 		t.Errorf("target not defined")
@@ -30,7 +33,8 @@ func TestProof(t *testing.T) {
 		t.Errorf("pow should be valid")
 	}
 
-	pow.Block.Data = []byte("modified data")
+	pow.Block.Transactions = []*transaction.Transaction{{ID: []byte("modified")}}
+
 	if pow.Validate() {
 		t.Errorf("pow should be invalid")
 	}
@@ -39,7 +43,8 @@ func TestProof(t *testing.T) {
 
 func BenchmarkProofRun(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		pow := NewProof(CreateBlock(fmt.Sprintf("test block %d", i), []byte("prev hash")))
+		data := []*transaction.Transaction{}
+		pow := NewProof(CreateBlock(data, []byte("prev hash")))
 		pow.Run()
 	}
 }
