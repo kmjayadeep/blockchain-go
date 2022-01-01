@@ -86,6 +86,53 @@ func InitBlockChain(db storage.Database, address string) (*BlockChain, error) {
 	return &chain, nil
 }
 
+func (chain *BlockChain) GetBalance(address string) int {
+	balance := 0
+	UTXOs := chain.findUTXO(address)
+
+	for _, out := range UTXOs {
+		balance += out.Value
+	}
+
+	return balance
+}
+
+func (chain *BlockChain) Send(from, to string, amount int) error {
+	acc, outputs := chain.findUsableOutputs(from, amount)
+	tx, err := transaction.NewTransaction(from, to, amount, acc, outputs)
+	if err != nil {
+		return err
+	}
+	return chain.AddBlock([]*transaction.Transaction{tx})
+}
+
+// Add a new block to blockchain with given set of transactions
+func (chain *BlockChain) AddBlock(transactions []*transaction.Transaction) error {
+	newBlock := block.CreateBlock(transactions, chain.LastHash)
+	serialized, err := newBlock.Serialize()
+	if err != nil {
+		return err
+	}
+	err = chain.DB.Put(newBlock.HashString(), serialized)
+	if err != nil {
+		return err
+	}
+	err = chain.DB.Put("lh", newBlock.Hash)
+	if err != nil {
+		return err
+	}
+	chain.LastHash = newBlock.Hash
+	return nil
+}
+
+func (chain *BlockChain) Iterator() *Iterator {
+	iter := &Iterator{
+		chain.DB,
+		fmt.Sprintf("%x", chain.LastHash),
+	}
+	return iter
+}
+
 // Find transactions which have unspent tokens for a given address
 func (chain *BlockChain) findUnspentTransactions(address string) []transaction.Transaction {
 	var unspentTxs []transaction.Transaction
@@ -172,51 +219,4 @@ func (chain *BlockChain) findUsableOutputs(address string, amount int) (int, map
 	}
 
 	return accumulated, unspentOuts
-}
-
-func (chain *BlockChain) GetBalance(address string) int {
-	balance := 0
-	UTXOs := chain.findUTXO(address)
-
-	for _, out := range UTXOs {
-		balance += out.Value
-	}
-
-	return balance
-}
-
-func (chain *BlockChain) Send(from, to string, amount int) error {
-	acc, outputs := chain.findUsableOutputs(from, amount)
-	tx, err := transaction.NewTransaction(from, to, amount, acc, outputs)
-	if err != nil {
-		return err
-	}
-	return chain.AddBlock([]*transaction.Transaction{tx})
-}
-
-// Add a new block to blockchain with given set of transactions
-func (chain *BlockChain) AddBlock(transactions []*transaction.Transaction) error {
-	newBlock := block.CreateBlock(transactions, chain.LastHash)
-	serialized, err := newBlock.Serialize()
-	if err != nil {
-		return err
-	}
-	err = chain.DB.Put(newBlock.HashString(), serialized)
-	if err != nil {
-		return err
-	}
-	err = chain.DB.Put("lh", newBlock.Hash)
-	if err != nil {
-		return err
-	}
-	chain.LastHash = newBlock.Hash
-	return nil
-}
-
-func (chain *BlockChain) Iterator() *Iterator {
-	iter := &Iterator{
-		chain.DB,
-		fmt.Sprintf("%x", chain.LastHash),
-	}
-	return iter
 }
