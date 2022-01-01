@@ -25,7 +25,7 @@ type TxInput struct {
 	Sig string
 }
 
-func (tx *Transaction) SetID() error {
+func (tx *Transaction) setID() error {
 	var encoded bytes.Buffer
 	var hash [32]byte
 
@@ -73,7 +73,7 @@ func NewTransaction(from, to string, amount, accumulated int, validOutputs map[s
 	}
 
 	tx := &Transaction{nil, inputs, outputs}
-	tx.SetID()
+	tx.setID()
 	return tx, nil
 }
 
@@ -86,7 +86,7 @@ func CoinbaseTx(to, data string) (*Transaction, error) {
 	txout := TxOutput{100, to}
 
 	tx := Transaction{nil, []TxInput{txin}, []TxOutput{txout}}
-	err := tx.SetID()
+	err := tx.setID()
 	if err != nil {
 		return nil, err
 	}
