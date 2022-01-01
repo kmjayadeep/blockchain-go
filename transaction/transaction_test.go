@@ -96,6 +96,26 @@ func TestCoinbaseDefaultData(t *testing.T) {
   checkEqual(t, inputs[0].Sig, "Coins to toaddr")
 }
 
+func TestCanUnlock(t *testing.T) {
+  in := transaction.TxInput{[]byte{}, -1, "test"}
+
+  can := in.CanUnlock("test")
+  can2 := in.CanUnlock("test2")
+
+  checkEqual(t, can, true)
+  checkEqual(t, can2, false)
+}
+
+func TestCanBeUnlocked(t *testing.T) {
+  out := transaction.TxOutput{100, "test"}
+
+  can := out.CanBeUnlocked("test")
+  can2 := out.CanBeUnlocked("test2")
+
+  checkEqual(t, can, true)
+  checkEqual(t, can2, false)
+}
+
 func checkDeepEqual(t *testing.T, expected, actual interface{}) {
   if !reflect.DeepEqual(expected,actual) {
     t.Errorf("expected %d, got %d", expected, actual)
