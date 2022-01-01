@@ -10,7 +10,6 @@ import (
 	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/blockchain"
 	"github.com/kmjayadeep/blockchain-go/storage"
-	"github.com/kmjayadeep/blockchain-go/transaction"
 )
 
 type CommandLine struct {
@@ -74,12 +73,7 @@ func (c *CommandLine) getBalance(address string) {
 		log.Fatal(err, "unable to continue blockchain")
 	}
 
-	balance := 0
-	UTXOs := chain.FindUTXO(address)
-
-	for _, out := range UTXOs {
-		balance += out.Value
-	}
+	balance := chain.GetBalance(address)
 
 	fmt.Printf("Balance of %s is : %d\n", address, balance)
 }
@@ -90,9 +84,10 @@ func (c *CommandLine) send(from, to string, amount int) {
 		log.Fatal(err, "unable to continue blockchain")
 	}
 
-	acc, outputs := chain.FindSpendableOutputs(from, amount)
-	tx, _ := transaction.NewTransaction(from, to, amount, acc, outputs)
-	chain.AddBlock([]*transaction.Transaction{tx})
+	err = chain.Send(from, to, amount)
+	if err != nil {
+		log.Fatal(err, "unable to send tokens")
+	}
 
 	fmt.Printf("success")
 }
@@ -155,7 +150,7 @@ func (c *CommandLine) Run(args []string) {
 
 	if sendCmd.Parsed() {
 		if *sendFrom == "" || *sendTo == "" || *sendAmount == 0 {
-			getBalanceCmd.Usage()
+			sendCmd.Usage()
 			runtime.Goexit()
 		}
 		c.send(*sendFrom, *sendTo, *sendAmount)

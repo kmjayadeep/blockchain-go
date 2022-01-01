@@ -87,7 +87,7 @@ func InitBlockChain(db storage.Database, address string) (*BlockChain, error) {
 }
 
 // Find transactions which have unspent tokens for a given address
-func (chain *BlockChain) FindUnspentTransactions(address string) []transaction.Transaction {
+func (chain *BlockChain) findUnspentTransactions(address string) []transaction.Transaction {
 	var unspentTxs []transaction.Transaction
 
 	spentTXOs := make(map[string][]int)
@@ -134,10 +134,10 @@ func (chain *BlockChain) FindUnspentTransactions(address string) []transaction.T
 }
 
 // Find unspent transaction outpits for a given address
-func (chain *BlockChain) FindUTXO(address string) []transaction.TxOutput {
+func (chain *BlockChain) findUTXO(address string) []transaction.TxOutput {
 	var UTXOs []transaction.TxOutput
 
-	unspentTransactions := chain.FindUnspentTransactions(address)
+	unspentTransactions := chain.findUnspentTransactions(address)
 
 	for _, tx := range unspentTransactions {
 		for _, out := range tx.Outputs {
@@ -151,9 +151,9 @@ func (chain *BlockChain) FindUTXO(address string) []transaction.TxOutput {
 }
 
 // Find spendable outputs for a given address
-func (chain *BlockChain) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
+func (chain *BlockChain) findUsableOutputs(address string, amount int) (int, map[string][]int) {
 	unspentOuts := make(map[string][]int)
-	unspentTxs := chain.FindUnspentTransactions(address)
+	unspentTxs := chain.findUnspentTransactions(address)
 
 	accumulated := 0
 
@@ -172,6 +172,26 @@ func (chain *BlockChain) FindSpendableOutputs(address string, amount int) (int, 
 	}
 
 	return accumulated, unspentOuts
+}
+
+func (chain *BlockChain) GetBalance(address string) int {
+	balance := 0
+	UTXOs := chain.findUTXO(address)
+
+	for _, out := range UTXOs {
+		balance += out.Value
+	}
+
+	return balance
+}
+
+func (chain *BlockChain) Send(from, to string, amount int) error {
+	acc, outputs := chain.findUsableOutputs(from, amount)
+	tx, err := transaction.NewTransaction(from, to, amount, acc, outputs)
+	if err != nil {
+		return err
+	}
+	return chain.AddBlock([]*transaction.Transaction{tx})
 }
 
 // Add a new block to blockchain with given set of transactions
