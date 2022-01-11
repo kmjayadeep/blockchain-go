@@ -11,7 +11,6 @@ import (
 
 const (
 	dbPath  = ".data/blocks"
-	address = "myaddress"
 )
 
 func main() {
