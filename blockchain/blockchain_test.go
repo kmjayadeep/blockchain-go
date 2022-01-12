@@ -162,3 +162,115 @@ func TestContinueBlockChainError(t *testing.T) {
 		t.Errorf("Expected error :%s", blockchain.ErrAlreadyInitialized.Error())
 	}
 }
+
+func TestSendWithCorrectFunds(t *testing.T) {
+	db, err := storage.NewDatabase(
+		badger.DefaultOptions("").WithInMemory(true).WithLogger(nil),
+	)
+
+	if err != nil {
+		t.Errorf("unable to initialize db")
+	}
+	defer db.Close()
+
+	address := "address1"
+
+	chain, err := blockchain.InitBlockChain(db, address)
+	if err != nil {
+		t.Errorf("unable to initialize chain with error %s", err.Error())
+	}
+
+	table := []struct {
+		tokens      int
+		expectError bool
+	}{
+		{
+			200,
+			true,
+		},
+		{
+			101,
+			true,
+		},
+		{
+			100,
+			false,
+		},
+		{
+			99,
+			false,
+		},
+	}
+
+	for _, data := range table {
+		err := chain.Send("address1", "address2", data.tokens)
+		if data.expectError && (err == nil || err.Error() != "not enough funds") {
+			t.Fatalf("expected an error, got %v, testdata : %v", err, data)
+		}
+		if !data.expectError && err != nil {
+			t.Fatalf("didnt expect an error, got %s, testdata : %v", err.Error(), data)
+		}
+		if !data.expectError {
+			// reverse the send
+			chain.Send("address2", "address1", data.tokens)
+		}
+	}
+
+}
+
+func TestSend(t *testing.T) {
+	db, err := storage.NewDatabase(
+		badger.DefaultOptions("").WithInMemory(true).WithLogger(nil),
+	)
+
+	if err != nil {
+		t.Errorf("unable to initialize db")
+	}
+	defer db.Close()
+
+	address := "address1"
+
+	chain, err := blockchain.InitBlockChain(db, address)
+	if err != nil {
+		t.Errorf("unable to initialize chain with error %s", err.Error())
+	}
+
+	initial := chain.GetBalance("address1")
+	if initial != 100 {
+		t.Errorf("Expected initial balance to be 100, got %v", initial)
+	}
+
+	err = chain.Send("address1", "address2", 10)
+	if err != nil {
+		t.Errorf("unable to send token with error %s", err.Error())
+	}
+
+	bal := chain.GetBalance("address1")
+	if bal != 90 {
+		t.Errorf("Expected balance to be 90, got %v", bal)
+	}
+	bal = chain.GetBalance("address2")
+	if bal != 10 {
+		t.Errorf("Expected balance to be 10, got %v", bal)
+	}
+
+	err = chain.Send("address2", "address3", 1)
+	if err != nil {
+		t.Errorf("unable to send token with error %s", err.Error())
+	}
+
+	bal = chain.GetBalance("address1")
+	if bal != 90 {
+		t.Errorf("Expected balance to be 90, got %v", bal)
+	}
+
+	bal = chain.GetBalance("address2")
+	if bal != 9 {
+		t.Errorf("Expected balance to be 9, got %v", bal)
+	}
+
+	bal = chain.GetBalance("address3")
+	if bal != 1 {
+		t.Errorf("Expected balance to be 1, got %v", bal)
+	}
+}

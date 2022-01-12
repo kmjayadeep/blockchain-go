@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	dbPath  = ".data/blocks"
+	dbPath = ".data/blocks"
 )
 
 func main() {
