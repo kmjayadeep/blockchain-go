@@ -3,6 +3,7 @@ package wallet_test
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
+	"reflect"
 	"testing"
 
 	"github.com/kmjayadeep/blockchain-go/wallet"
@@ -20,6 +21,12 @@ func TestMakeWallet(t *testing.T) {
 		t.Errorf("public key should be defined")
 	}
 
+	key := w.PrivateKey.PublicKey
+	publicKey := append(key.X.Bytes(), key.Y.Bytes()...)
+
+	if !reflect.DeepEqual(publicKey, w.PublicKey) {
+		t.Errorf("invalid publickey, got %v, expected %v", w.PublicKey, publicKey)
+	}
 }
 
 func TestWalletAddress(t *testing.T) {
