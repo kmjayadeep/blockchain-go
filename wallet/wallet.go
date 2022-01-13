@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	checksumLength = 4
-	version        = byte(0x0)
+	version = byte(0x0)
 )
 
 type Wallet struct {
