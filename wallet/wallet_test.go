@@ -30,11 +30,11 @@ func TestMakeWallet(t *testing.T) {
 }
 
 func TestWalletAddress(t *testing.T) {
-	pubKey := "testkey"
+	pubKey, _ := hex.DecodeString("7381724bcc3ca2757ff18a17bf19de955d7ec670978296b843242954cd4df0ce79e68aa61bf7898f0ccfbb72ee928d73c4ced17eb7becad8144ef00c17a186b7")
 
 	w := wallet.Wallet{
 		ecdsa.PrivateKey{},
-		[]byte(pubKey),
+		pubKey,
 	}
 
 	address, err := w.Address()
@@ -43,10 +43,9 @@ func TestWalletAddress(t *testing.T) {
 		t.Errorf("got error when getting address, %v", err)
 	}
 
-	encAddr := hex.EncodeToString(address)
-	expected := "314c52486e397032346a385739337971556f6f48644c31325747324a766a6d417a50"
+	expected := "18vVoVqR3DuFL3Eh8eFWTjV5iyfCEueCVB"
 
-	if encAddr != expected {
-		t.Errorf("invalid wallet address, expected %v, got %v", expected, encAddr)
+	if string(address) != expected {
+		t.Errorf("invalid wallet address, expected %v, got %s", expected, address)
 	}
 }
