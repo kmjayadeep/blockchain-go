@@ -6,6 +6,11 @@ import (
 	"crypto/rand"
 )
 
+const (
+	checksumLength = 4
+	version        = byte(0x0)
+)
+
 type Wallet struct {
 	PrivateKey ecdsa.PrivateKey
 	PublicKey  []byte
