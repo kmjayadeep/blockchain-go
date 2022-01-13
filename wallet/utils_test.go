@@ -52,3 +52,27 @@ func TestChecksum(t *testing.T) {
 	}
 
 }
+
+func TestBase58(t *testing.T) {
+
+	payload := []byte("test")
+
+	enc := base58Encode(payload)
+	encHex := hex.EncodeToString(enc)
+	expected := "33795a653764"
+
+	if encHex != expected {
+		t.Fatalf("wrong encoded data, got %v, expected %v", encHex, expected)
+	}
+
+	dec, err := base58Decode(enc)
+
+	if err != nil {
+		t.Fatalf("got error while decoding, %v", err)
+	}
+
+	if string(dec) != string(payload) {
+		t.Fatalf("wrong decoded data, got %v, expected %v", dec, payload)
+	}
+
+}

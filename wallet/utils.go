@@ -3,6 +3,7 @@ package wallet
 import (
 	"crypto/sha256"
 
+	"github.com/mr-tron/base58"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -32,4 +33,14 @@ func checksum(payload []byte) []byte {
 	hash2 := sha256.Sum256(hash1[:])
 
 	return hash2[:checksumLength]
+}
+
+func base58Encode(input []byte) []byte {
+	encode := base58.Encode(input)
+	return []byte(encode)
+}
+
+func base58Decode(input []byte) ([]byte, error) {
+	encode, err := base58.Decode(string(input[:]))
+	return []byte(encode), err
 }
