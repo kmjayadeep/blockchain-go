@@ -30,3 +30,19 @@ func MakeWallet() (*Wallet, error) {
 		pub,
 	}, nil
 }
+
+func (w *Wallet) Address() ([]byte, error) {
+	pubHash, err := publicKeyHash(w.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+
+	versionedHash := append([]byte{version}, pubHash...)
+	csum := checksum(versionedHash)
+
+	fullHash := append(versionedHash, csum...)
+
+	address := base58Encode(fullHash)
+
+	return address, nil
+}
