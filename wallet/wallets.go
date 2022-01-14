@@ -32,3 +32,15 @@ func (ws *Wallets) Save(w io.Writer) error {
 	encoder := gob.NewEncoder(w)
 	return encoder.Encode(ws)
 }
+
+func (ws *Wallets) GetWallet(address string) *Wallet {
+	return ws.Wallets[address]
+}
+
+func (ws *Wallets) GetAllAddresses() []string {
+	var addresses []string
+	for addr := range ws.Wallets {
+		addresses = append(addresses, addr)
+	}
+	return addresses
+}

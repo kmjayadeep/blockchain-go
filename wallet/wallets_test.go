@@ -39,3 +39,38 @@ func TestWalletsStore(t *testing.T) {
 		t.Errorf("not stored properly")
 	}
 }
+
+func TestGetWallet(t *testing.T) {
+	wallets := map[string]*wallet.Wallet{
+		"a": {},
+		"b": {},
+	}
+	ws := wallet.Wallets{
+		Wallets: wallets,
+	}
+
+	if !reflect.DeepEqual(ws.GetWallet("a"), wallets["a"]) {
+		t.Errorf("not retrieving correct wallet")
+	}
+
+	if ws.GetWallet("c") != nil {
+		t.Errorf("not returning wallet as nil")
+	}
+}
+
+func TestGetAllAddresses(t *testing.T) {
+	wallets := map[string]*wallet.Wallet{
+		"a": {},
+		"b": {},
+	}
+	ws := wallet.Wallets{
+		Wallets: wallets,
+	}
+
+	addresses := ws.GetAllAddresses()
+	expected := []string{"a", "b"}
+
+	if !reflect.DeepEqual(addresses, expected) {
+		t.Errorf("not returning all addrresses, got %v, expected %v", addresses, expected)
+	}
+}
