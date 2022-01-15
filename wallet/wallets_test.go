@@ -9,14 +9,14 @@ import (
 	"github.com/kmjayadeep/blockchain-go/wallet"
 )
 
-func TestInitWalletTestWalletsStore(t *testing.T) {
+func TestInitStore(t *testing.T) {
 	path, err := os.MkdirTemp("", "wallet")
 	defer os.RemoveAll(path)
 	if err != nil {
 		t.Errorf("Unable to init wallets dir with error %v", err)
 	}
 	path = path + "/wallet.bin"
-	ws, err := wallet.InitWallets(path)
+	ws, err := wallet.InitStore(path)
 	if err != nil {
 		t.Errorf("Unable to init wallets with error %v", err)
 	}
@@ -43,7 +43,7 @@ func TestInitWalletTestWalletsStore(t *testing.T) {
 	}
 	file.Close()
 
-	loaded, err := wallet.InitWallets(path)
+	loaded, err := wallet.InitStore(path)
 
 	if loaded == nil || loaded.Wallets == nil {
 		t.Fatalf("Wallets are nil")
@@ -58,10 +58,10 @@ func TestInitWalletTestWalletsStore(t *testing.T) {
 	}
 }
 
-func TestWalletsStore(t *testing.T) {
+func TestStoreSave(t *testing.T) {
 	b := bytes.Buffer{}
 
-	ws := &wallet.Wallets{
+	ws := &wallet.Store{
 		Wallets: make(map[string]*wallet.Wallet),
 	}
 	w := wallet.Wallet{
@@ -74,7 +74,7 @@ func TestWalletsStore(t *testing.T) {
 		t.Errorf("Unable to save wallets with error %v", err)
 	}
 
-	loaded, err := wallet.LoadWallets(&b)
+	loaded, err := wallet.Load(&b)
 	if err != nil {
 		t.Errorf("Unable to load wallets with error %v", err)
 	}
@@ -97,7 +97,7 @@ func TestGetWallet(t *testing.T) {
 		"a": {},
 		"b": {},
 	}
-	ws := wallet.Wallets{
+	ws := wallet.Store{
 		Wallets: wallets,
 	}
 
@@ -115,7 +115,7 @@ func TestGetAllAddresses(t *testing.T) {
 		"a": {},
 		"b": {},
 	}
-	ws := wallet.Wallets{
+	ws := wallet.Store{
 		Wallets: wallets,
 	}
 
