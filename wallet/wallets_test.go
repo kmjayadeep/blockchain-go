@@ -2,11 +2,61 @@ package wallet_test
 
 import (
 	"bytes"
+	"os"
 	"reflect"
 	"testing"
 
 	"github.com/kmjayadeep/blockchain-go/wallet"
 )
+
+func TestInitWalletTestWalletsStore(t *testing.T) {
+	path, err := os.MkdirTemp("", "wallet")
+	defer os.RemoveAll(path)
+	if err != nil {
+		t.Errorf("Unable to init wallets dir with error %v", err)
+	}
+	path = path + "/wallet.bin"
+	ws, err := wallet.InitWallets(path)
+	if err != nil {
+		t.Errorf("Unable to init wallets with error %v", err)
+	}
+	if ws == nil {
+		t.Errorf("received nil wallet object")
+	}
+	_, err = os.Stat(path)
+	if err != nil {
+		t.Errorf("wallet not written to file %v", err)
+	}
+
+	w := wallet.Wallet{
+		PublicKey: []byte("test"),
+	}
+	ws.Wallets["test"] = &w
+
+	file, err := os.OpenFile(path, os.O_WRONLY, 0666)
+	if err != nil {
+		t.Errorf("unable to open file %v", err)
+	}
+	err = ws.Save(file)
+	if err != nil {
+		t.Errorf("unable to save file %v", err)
+	}
+	file.Close()
+
+	loaded, err := wallet.InitWallets(path)
+
+	if loaded == nil || loaded.Wallets == nil {
+		t.Fatalf("Wallets are nil")
+	}
+
+	if len(loaded.Wallets) == 0 {
+		t.Errorf("Wallets are empty")
+	}
+
+	if !reflect.DeepEqual(loaded, ws) {
+		t.Errorf("not stored properly. expected %v, got %v", ws, loaded)
+	}
+}
 
 func TestWalletsStore(t *testing.T) {
 	b := bytes.Buffer{}

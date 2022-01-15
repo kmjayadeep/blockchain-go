@@ -16,7 +16,7 @@ type Wallets struct {
 func InitWallets(filePath string) (*Wallets, error) {
 	_, err := os.Stat(filePath)
 	if os.IsNotExist(err) {
-		file, err := os.Open(filePath)
+		file, err := os.Create(filePath)
 		if err != nil {
 			return nil, err
 		}
@@ -27,6 +27,7 @@ func InitWallets(filePath string) (*Wallets, error) {
 		return ws, nil
 	}
 	file, err := os.Open(filePath)
+	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
