@@ -11,7 +11,9 @@ import (
 func TestWalletsStore(t *testing.T) {
 	b := bytes.Buffer{}
 
-	ws := wallet.NewWallets()
+	ws := &wallet.Wallets{
+		Wallets: make(map[string]*wallet.Wallet),
+	}
 	w := wallet.Wallet{
 		PublicKey: []byte("test"),
 	}
@@ -36,7 +38,7 @@ func TestWalletsStore(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(loaded, ws) {
-		t.Errorf("not stored properly")
+		t.Errorf("not stored properly. expected %v, got %v", ws, loaded)
 	}
 }
 

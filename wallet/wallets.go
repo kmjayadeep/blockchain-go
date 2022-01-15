@@ -4,16 +4,33 @@ import (
 	"crypto/elliptic"
 	"encoding/gob"
 	"io"
+	"os"
 )
 
 type Wallets struct {
 	Wallets map[string]*Wallet
 }
 
-func NewWallets() *Wallets {
-	return &Wallets{
-		Wallets: make(map[string]*Wallet),
+// Initialize a new wallet store by reading the given filePath
+// If the file doesn't exist, create a new file
+func InitWallets(filePath string) (*Wallets, error) {
+	_, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
+		file, err := os.Open(filePath)
+		if err != nil {
+			return nil, err
+		}
+		ws := &Wallets{
+			Wallets: make(map[string]*Wallet),
+		}
+		ws.Save(file)
+		return ws, nil
 	}
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	return LoadWallets(file)
 }
 
 func LoadWallets(r io.Reader) (*Wallets, error) {
