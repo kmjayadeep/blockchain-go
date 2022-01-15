@@ -55,6 +55,21 @@ func (ws *Store) GetWallet(address string) *Wallet {
 	return ws.Wallets[address]
 }
 
+func (ws *Store) AddWallet() (string, error) {
+	w, err := MakeWallet()
+	if err != nil {
+		return "", err
+	}
+
+	address, err := w.AddressString()
+	if err != nil {
+		return "", err
+	}
+
+	ws.Wallets[address] = w
+	return address, nil
+}
+
 func (ws *Store) GetAllAddresses() []string {
 	var addresses []string
 	for addr := range ws.Wallets {

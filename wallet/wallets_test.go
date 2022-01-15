@@ -126,3 +126,16 @@ func TestGetAllAddresses(t *testing.T) {
 		t.Errorf("not returning all addrresses, got %v, expected %v", addresses, expected)
 	}
 }
+
+func TestAddWallet(t *testing.T) {
+	ws := &wallet.Store{
+		Wallets: make(map[string]*wallet.Wallet),
+	}
+	address, err := ws.AddWallet()
+	if err != nil {
+		t.Errorf("unable to add wallet with error %v", err)
+	}
+	if len(address) != 34 || address[0] != '1' {
+		t.Errorf("invalid address format: len %v, address %v", len(address), address)
+	}
+}

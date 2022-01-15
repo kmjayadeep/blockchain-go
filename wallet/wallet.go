@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"fmt"
 )
 
 const (
@@ -45,4 +46,12 @@ func (w *Wallet) Address() ([]byte, error) {
 	address := base58Encode(fullHash)
 
 	return address, nil
+}
+
+func (w *Wallet) AddressString() (string, error) {
+	address, err := w.Address()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s", address), nil
 }
