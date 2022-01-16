@@ -4,13 +4,17 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"runtime"
 	"strconv"
 
 	"github.com/kmjayadeep/blockchain-go/block"
 	"github.com/kmjayadeep/blockchain-go/blockchain"
 	"github.com/kmjayadeep/blockchain-go/storage"
+	"github.com/kmjayadeep/blockchain-go/wallet"
 )
+
+const walletPath = ".data/wallet.bin"
 
 type CommandLine struct {
 	db *storage.DB
@@ -28,6 +32,8 @@ func (c *CommandLine) printUsage() {
 	fmt.Println(" createblockchain -address - Creates a blockchain with genesis block created for the address")
 	fmt.Println(" print - Prints the blocks in the chain")
 	fmt.Println(" send -from FROM -to TO -amount AMOUNT - send token")
+	fmt.Println(" createwallet - Create a new wallet and print the address")
+	fmt.Println(" listwallets - List the addresses in our wallet store")
 }
 
 func (c *CommandLine) validateArgs(args []string) {
@@ -78,6 +84,42 @@ func (c *CommandLine) getBalance(address string) {
 	fmt.Printf("Balance of %s is : %d\n", address, balance)
 }
 
+func (c *CommandLine) createWallets() {
+	store, err := wallet.InitStore(walletPath)
+	if err != nil {
+		log.Fatal(err, "unable to open wallet store")
+	}
+
+	addr, err := store.AddWallet()
+	if err != nil {
+		log.Fatal(err, "unable to add wallet")
+	}
+
+	file, err := os.OpenFile(walletPath, os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err, "unable to open wallet store")
+	}
+	err = store.Save(file)
+	if err != nil {
+		log.Fatal(err, "unable to save wallet")
+	}
+
+	fmt.Printf("Wallet created with address : %s", addr)
+}
+
+func (c *CommandLine) listWallets() {
+	store, err := wallet.InitStore(walletPath)
+	if err != nil {
+		log.Fatal(err, "unable to open wallet store")
+	}
+
+	addrs := store.GetAllAddresses()
+	fmt.Printf("Addresses :\n")
+	for _, addr := range addrs {
+		fmt.Printf("* %s\n", addr)
+	}
+}
+
 func (c *CommandLine) send(from, to string, amount int) {
 	chain, err := blockchain.ContinueBlockChain(c.db)
 	if err != nil {
@@ -99,6 +141,8 @@ func (c *CommandLine) Run(args []string) {
 	createBlockchainCmd := flag.NewFlagSet("createBlockchain", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet("print", flag.ExitOnError)
+	createWalletCmd := flag.NewFlagSet("createwallet", flag.ExitOnError)
+	listWalletsCmd := flag.NewFlagSet("listwallets", flag.ExitOnError)
 
 	getBalanceAddress := getBalanceCmd.String("address", "", "The address to get balance for")
 	createBlockchainAddress := createBlockchainCmd.String("address", "", "The address to create blockchain with")
@@ -123,6 +167,14 @@ func (c *CommandLine) Run(args []string) {
 		err := getBalanceCmd.Parse(args[2:])
 		handleErr(err)
 
+	case "createwallet":
+		err := createWalletCmd.Parse(args[2:])
+		handleErr(err)
+
+	case "listwallets":
+		err := listWalletsCmd.Parse(args[2:])
+		handleErr(err)
+
 	default:
 		c.printUsage()
 		runtime.Goexit()
@@ -130,6 +182,14 @@ func (c *CommandLine) Run(args []string) {
 
 	if printChainCmd.Parsed() {
 		c.printChain()
+	}
+
+	if createWalletCmd.Parsed() {
+		c.createWallets()
+	}
+
+	if listWalletsCmd.Parsed() {
+		c.listWallets()
 	}
 
 	if createBlockchainCmd.Parsed() {
